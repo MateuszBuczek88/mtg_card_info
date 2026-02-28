@@ -47,18 +47,24 @@ function showInfo(msg) {
     infoEl.classList.remove('hidden');
 }
 
+// Helper for Scryfall rate limit compliance (50-100ms recommended, using 500ms per user request)
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 async function searchCard(query) {
     showLoading();
 
     try {
         // Try exact match first
         const exactRes = await fetch(`${API_BASE}/named?exact=${encodeURIComponent(query)}`);
-        
+
         if (exactRes.ok) {
             const card = await exactRes.json();
             renderExactMatch(card);
             return;
         }
+
+        // Add 500ms delay before secondary fallback request to respect Scryfall API limits
+        await delay(500);
 
         // If exact match fails, try fuzzy or general search
         const searchRes = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
@@ -100,12 +106,12 @@ async function fetchCardById(id) {
 function renderMultiMatch(cards) {
     formatReset();
     multiResultsContainer.classList.remove('hidden');
-    
+
     // Deduplicate by name if user just searched a partial name that has many printings
     // Scryfall /search usually returns distinct cards unless specified, but to be safe:
     const uniqueCards = [];
     const seenNames = new Set();
-    
+
     for (const card of cards) {
         if (!seenNames.has(card.name)) {
             uniqueCards.push(card);
@@ -116,11 +122,11 @@ function renderMultiMatch(cards) {
     uniqueCards.forEach(card => {
         const li = document.createElement('li');
         li.className = 'card-list-item';
-        
+
         const nameSpan = document.createElement('span');
         nameSpan.className = 'card-name';
         nameSpan.textContent = card.name;
-        
+
         const setSpan = document.createElement('span');
         setSpan.className = 'card-set';
         setSpan.textContent = `${card.set_name} • ${card.type_line}`;
@@ -147,7 +153,7 @@ function generateCardText(card) {
     const colorIdentity = card.color_identity && card.color_identity.length > 0
         ? card.color_identity.join(', ')
         : 'Colorless';
-        
+
     // Handle double-faced cards colors
     let cardColors = card.colors;
     if (!cardColors && card.card_faces) {
@@ -166,7 +172,7 @@ function generateCardText(card) {
     // Handle double-faced cards oracle text and mana costs
     let oracleText = '';
     let manaCost = card.mana_cost || 'None';
-    
+
     if (card.card_faces && card.card_faces.length > 1) {
         oracleText = card.card_faces.map(face => `--- ${face.name} ---\n${face.oracle_text || ''}`).join('\n\n');
         manaCost = card.card_faces.map(face => face.mana_cost).filter(Boolean).join(' // ') || 'None';
@@ -186,13 +192,20 @@ ${oracleText}`;
 
 function renderExactMatch(card) {
     formatReset();
-    
+
     // Handle split/transform cards for image
     let imageUrl = '';
-    if (card.image_uris && card.image_uris.normal) {
-        imageUrl = card.image_uris.normal;
-    } else if (card.card_faces && card.card_faces[0].image_uris && card.card_faces[0].image_uris.normal) {
+    let backImageUrl = '';
+    let isDoubleFaced = false;
+
+    if (card.card_faces && card.card_faces[0].image_uris && card.card_faces[1] && card.card_faces[1].image_uris) {
+        // True double faced card (e.g., MDFC or Transform)
+        isDoubleFaced = true;
         imageUrl = card.card_faces[0].image_uris.normal;
+        backImageUrl = card.card_faces[1].image_uris.normal;
+    } else if (card.image_uris && card.image_uris.normal) {
+        // Standard card
+        imageUrl = card.image_uris.normal;
     } else {
         // Fallback or missing image
         imageUrl = 'https://via.placeholder.com/300x418?text=No+Image+Available';
@@ -202,10 +215,25 @@ function renderExactMatch(card) {
 
     resultsContainer.innerHTML = `
         <div class="card-result">
-            <div class="card-image-container">
-                <img src="${imageUrl}" alt="${card.name}" class="card-image">
+            <div class="card-image-container ${isDoubleFaced ? 'is-double-faced' : ''}" id="card-image-container">
+                <div class="card-flipper" id="card-flipper">
+                    <div class="card-front">
+                        <img src="${imageUrl}" alt="${card.name}" class="card-image">
+                    </div>
+                    ${isDoubleFaced ? `
+                    <div class="card-back">
+                        <img src="${backImageUrl}" alt="${card.name} (Back)" class="card-image">
+                    </div>
+                    ` : ''}
+                </div>
+                ${isDoubleFaced ? `
+                <div class="flip-btn" id="flip-btn" title="Click to flip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.36-2.04"></path></svg>
+                </div>
+                ` : ''}
             </div>
             <div class="card-info-box">
+                <textarea id="ai-prompt-input" class="ai-prompt-input">Please explain this card for me</textarea>
                 <div class="card-info-content" id="card-text-content">${cardText}</div>
                 <button id="copy-btn" class="copy-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -217,14 +245,26 @@ function renderExactMatch(card) {
 
     resultsContainer.classList.remove('hidden');
 
+    // Add flip listener if double faced
+    if (isDoubleFaced) {
+        const imageContainer = document.getElementById('card-image-container');
+        const cardFlipper = document.getElementById('card-flipper');
+
+        imageContainer.addEventListener('click', () => {
+            cardFlipper.classList.toggle('flipped');
+        });
+    }
+
     // Add copy listener
     const copyBtn = document.getElementById('copy-btn');
+    const aiPromptInput = document.getElementById('ai-prompt-input');
     copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(cardText).then(() => {
+        const fullTextToCopy = `${aiPromptInput.value}\n\n${cardText}`;
+        navigator.clipboard.writeText(fullTextToCopy).then(() => {
             const originalText = copyBtn.innerHTML;
             copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
             copyBtn.classList.add('copied');
-            
+
             setTimeout(() => {
                 copyBtn.innerHTML = originalText;
                 copyBtn.classList.remove('copied');
