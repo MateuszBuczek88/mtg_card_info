@@ -312,9 +312,9 @@ function renderExactMatch(card) {
             </div>
             <div class="card-info-box">
                 <div class="flags-container">
-                    <button class="lang-flag ${currentLanguage === 'en' ? 'active' : ''}" data-lang="en" title="English">🇬🇧</button>
-                    <button class="lang-flag ${currentLanguage === 'pl' ? 'active' : ''}" data-lang="pl" title="Polski">🇵🇱</button>
-                    <button class="lang-flag ${currentLanguage === 'es' ? 'active' : ''}" data-lang="es" title="Español">🇪🇸</button>
+                    <button class="lang-flag ${currentLanguage === 'en' ? 'active' : ''}" data-lang="en" title="English"><span class="fi fi-gb"></span></button>
+                    <button class="lang-flag ${currentLanguage === 'pl' ? 'active' : ''}" data-lang="pl" title="Polski"><span class="fi fi-pl"></span></button>
+                    <button class="lang-flag ${currentLanguage === 'es' ? 'active' : ''}" data-lang="es" title="Español"><span class="fi fi-es"></span></button>
                 </div>
                 <textarea id="ai-prompt-input" class="ai-prompt-input">${PROMPTS[currentLanguage]}</textarea>
                 <div class="card-info-content" id="card-text-content">${cardText}</div>
