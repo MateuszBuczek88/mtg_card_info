@@ -350,13 +350,29 @@ function renderExactMatch(card) {
             hideTimeout = null;
         }
         const keyword = (badge.dataset.keyword || '').toLowerCase();
-        // Use the global KEYWORDS_DATA from keywords-data.js
-        let def = typeof KEYWORDS_DATA !== 'undefined' ? KEYWORDS_DATA[keyword] : null;
 
-        if (!def && typeof KEYWORDS_DATA !== 'undefined') {
-            const knownKeywords = Object.keys(KEYWORDS_DATA);
+        // Determine data source based on language
+        let dataSource = KEYWORDS_DATA;
+        if (currentLanguage === 'pl' && typeof KEYWORDS_DATA_PL !== 'undefined') dataSource = KEYWORDS_DATA_PL;
+        if (currentLanguage === 'es' && typeof KEYWORDS_DATA_ES !== 'undefined') dataSource = KEYWORDS_DATA_ES;
+
+        let def = dataSource[keyword];
+
+        // Partial match fallback within the localized source
+        if (!def) {
+            const knownKeywords = Object.keys(dataSource);
             const foundBase = knownKeywords.find(k => keyword.includes(k));
-            if (foundBase) def = KEYWORDS_DATA[foundBase];
+            if (foundBase) def = dataSource[foundBase];
+        }
+
+        // Global fallback to English if translation is missing
+        if (!def && dataSource !== KEYWORDS_DATA) {
+            def = KEYWORDS_DATA[keyword];
+            if (!def) {
+                const enKeywords = Object.keys(KEYWORDS_DATA);
+                const foundEnBase = enKeywords.find(k => keyword.includes(k));
+                if (foundEnBase) def = KEYWORDS_DATA[foundEnBase];
+            }
         }
 
         if (def) {
