@@ -1,0 +1,353 @@
+const KEYWORDS_RAW = {
+    // 701. Keyword Actions
+    "Activate": {
+        "short": "Put an ability onto the stack and pay its costs.",
+        "long": "701.2a To activate an activated ability is to put it onto the stack and pay its costs, so that it will eventually resolve and have its effect."
+    },
+    "Attach": {
+        "short": "Move an Aura, Equipment, or Fortification onto an object or player.",
+        "long": "701.3a To attach an Aura, Equipment, or Fortification to an object or player means to take it from where it currently is and put it onto that object or player."
+    },
+    "Behold": {
+        "short": "Reveal a card from hand or choose a permanent with a specified quality.",
+        "long": "701.4a “Behold a [quality]” means “Reveal a [quality] card from your hand or choose a [quality] permanent you control on the battlefield.”"
+    },
+    "Cast": {
+        "short": "Put a spell on the stack and pay its costs.",
+        "long": "701.5a To cast a spell is to take it from the zone it's in (usually the hand), put it on the stack, and pay its costs, so that it will eventually resolve and have its effect."
+    },
+    "Counter": {
+        "short": "Cancel a spell or ability so it doesn't resolve.",
+        "long": "701.6a To counter a spell or ability means to cancel it, removing it from the stack. It doesn't resolve and none of its effects occur."
+    },
+    "Create": {
+        "short": "Put a token onto the battlefield.",
+        "long": "701.7a To create one or more tokens with certain characteristics, put the specified number of tokens with the specified characteristics onto the battlefield."
+    },
+    "Destroy": {
+        "short": "Move a permanent from the battlefield to its owner’s graveyard.",
+        "long": "701.8a To destroy a permanent, move it from the battlefield to its owner's graveyard."
+    },
+    "Discard": {
+        "short": "Move a card from your hand to your graveyard.",
+        "long": "701.9a To discard a card, move it from its owner's hand to that player's graveyard."
+    },
+    "Double": {
+        "short": "Increase a value (life, power, counters) to twice its current amount.",
+        "long": "701.10e To double the number of a kind of counters on a player or permanent, give that player or permanent as many of those counters as that player or permanent already has."
+    },
+    "Triple": {
+        "short": "Increase a value to three times its current amount.",
+        "long": "701.11b To triple a creature's power, that creature gets +X/+0, where X is twice that creature's power as the spell or ability resolves."
+    },
+    "Exchange": {
+        "short": "Swap control, life totals, or objects between players or zones.",
+        "long": "701.12a A spell or ability may instruct players to exchange something (for example, life totals or control of two permanents) as part of its resolution."
+    },
+    "Exile": {
+        "short": "Move an object to the exile zone.",
+        "long": "701.13a To exile an object, move it to the exile zone from wherever it is."
+    },
+    "Fight": {
+        "short": "Two creatures each deal damage equal to their power to the other.",
+        "long": "701.14a Each of those creatures deals damage equal to its power to the other creature. Damage dealt when a creature fights isn't combat damage."
+    },
+    "Goad": {
+        "short": "The creature attacks each combat if able and attacks a player other than you if able.",
+        "long": "701.15b A goaded creature attacks each combat if able and attacks a player other than the controller of the effect that goaded it if able."
+    },
+    "Investigate": {
+        "short": "Create a Clue token (an artifact with \"{2}, Sacrifice: Draw a card\").",
+        "long": "701.16a “Investigate” means “Create a Clue token.”"
+    },
+    "Mill": {
+        "short": "Put cards from the top of your library into your graveyard.",
+        "long": "701.17a For a player to mill a number of cards, that player puts that many cards from the top of their library into their graveyard."
+    },
+    "Play": {
+        "short": "Put a land onto the battlefield or cast a card as a spell.",
+        "long": "701.18b To play a card means to play that card as a land or to cast that card as a spell, whichever is appropriate."
+    },
+    "Regenerate": {
+        "short": "The next time this permanent would be destroyed this turn, it isn't. Instead, tap it and remove it from combat.",
+        "long": "701.19a “Regenerate [permanent]” means “The next time [permanent] would be destroyed this turn, instead remove all damage marked on it and its controller taps it. If it's an attacking or blocking creature, remove it from combat.”"
+    },
+    "Reveal": {
+        "short": "Show a card to all players.",
+        "long": "701.20a To reveal a card, show that card to all players for a brief time."
+    },
+    "Sacrifice": {
+        "short": "Move a permanent you control to your graveyard.",
+        "long": "701.21a To sacrifice a permanent, its controller moves it from the battlefield directly to its owner's graveyard. A player can't sacrifice something they don't control."
+    },
+    "Scry": {
+        "short": "Look at the top N cards of your library, then put any number on bottom and the rest on top.",
+        "long": "701.22a To “scry N” means to look at the top N cards of your library, then put any number of them on the bottom of your library in any order and the rest on top of your library in any order."
+    },
+    "Search": {
+        "short": "Look at all cards in a zone to find a card matching a description.",
+        "long": "701.23a To search for a card in a zone, look at all cards in that zone (even if it's a hidden zone) and find a card that matches the given description."
+    },
+    "Shuffle": {
+        "short": "Randomize the cards within a library or pile.",
+        "long": "701.24a To shuffle a library or a face-down pile of cards, randomize the cards within it so that no player knows their order."
+    },
+    "Surveil": {
+        "short": "Look at the top N cards of your library, then put any number into your graveyard and the rest on top.",
+        "long": "701.25a To “surveil N” means to look at the top N cards of your library, then put any number of them into your graveyard and the rest on top of your library in any order."
+    },
+    "Tap and Untap": {
+        "short": "Rotate a permanent sideways (tap) or back upright (untap).",
+        "long": "701.26a To tap a permanent, turn it sideways. 701.26b To untap a permanent, rotate it back upright."
+    },
+    "Transform": {
+        "short": "Turn a double-faced permanent over to its other face.",
+        "long": "701.27a To transform a permanent, turn it over so that its other face is up. Only double-faced tokens and cards can transform."
+    },
+    "Convert": {
+        "short": "Turn a double-faced permanent over (similar to transform).",
+        "long": "701.28a To convert a permanent, turn it so that its other face is up. This follows rules for transforming."
+    },
+    "Fateseal": {
+        "short": "Look at the top N cards of an opponent's library, then put any on bottom and the rest on top.",
+        "long": "701.29a To “fateseal N” means to look at the top N cards of an opponent's library, then put any number of them on the bottom of that library in any order and the rest on top of that library in any order."
+    },
+    "Clash": {
+        "short": "Choose an opponent. Each reveals the top card of their library; highest mana value wins.",
+        "long": "701.30b “Clash with an opponent” means “Choose an opponent. You and that opponent each clash.” A player wins a clash if they revealed a card with a higher mana value."
+    },
+    "Planeswalk": {
+        "short": "Move to a different plane in Planechase game.",
+        "long": "701.31b To planeswalk is to put face-up plane cards on the bottom of the planar deck and turn the top card of your planar deck face up."
+    },
+    "Set in Motion": {
+        "short": "Move a scheme card off the top of your scheme deck and turn it face up.",
+        "long": "701.32b To set a scheme in motion, move it off the top of your scheme deck and turn it face up if it isn't face up."
+    },
+    "Abandon": {
+        "short": "Turn an ongoing scheme face down and put it on the bottom of its owner's scheme deck.",
+        "long": "701.33b To abandon a scheme, turn it face down and put it on the bottom of its owner's scheme deck."
+    },
+    "Proliferate": {
+        "short": "Choose any number of players and/or permanents with counters; give each another of those counters.",
+        "long": "701.34a To proliferate means to choose any number of permanents and/or players that have a counter, then give each one additional counter of each kind that permanent or player already has."
+    },
+    "Detain": {
+        "short": "Until your next turn, that permanent can't attack, block, or have its activated abilities activated.",
+        "long": "701.35a Certain spells and abilities can detain a permanent. Until the next turn of its controller, that permanent can't attack or block and its activated abilities can't be activated."
+    },
+    "Populate": {
+        "short": "Choose a creature token you control and create a token that's a copy of it.",
+        "long": "701.36a To populate means to choose a creature token you control and create a token that's a copy of that creature token."
+    },
+    "Monstrosity": {
+        "short": "If this isn't monstrous, put N +1/+1 counters on it and it becomes monstrous.",
+        "long": "701.37a “Monstrosity N” means “If this permanent isn't monstrous, put N +1/+1 counters on it and it becomes monstrous.”"
+    },
+    "Vote": {
+        "short": "Each player chooses one option from a list.",
+        "long": "701.38a Each player, starting with a specified player and proceeding in turn order, chooses one of those choices."
+    },
+    "Bolster": {
+        "short": "Choose a creature you control with the least toughness and put N +1/+1 counters on it.",
+        "long": "701.39a “Bolster N” means “Choose a creature you control with the least toughness or tied for least toughness. Put N +1/+1 counters on that creature.”"
+    },
+    "Manifest": {
+        "short": "Put a card onto the battlefield face down as a 2/2 creature. You can turn it face up for its mana cost.",
+        "long": "701.40a To manifest a card, turn it face down. It becomes a 2/2 face-down creature card with no text, no name, no subtypes, and no mana cost."
+    },
+    "Support": {
+        "short": "Put a +1/+1 counter on each of up to N other target creatures.",
+        "long": "701.41a “Support N” on a permanent means “Put a +1/+1 counter on each of up to N other target creatures.”"
+    },
+    "Meld": {
+        "short": "Combine two cards into a single large back face.",
+        "long": "701.42a Meld is putting two cards on the battlefield with their back faces up and combined. The resulting permanent is a single object represented by two cards."
+    },
+    "Exert": {
+        "short": "Choose to have a permanent not untap during your next untap step for an effect.",
+        "long": "701.43a To exert a permanent, you choose to have it not untap during your next untap step."
+    },
+    "Explore": {
+        "short": "Reveal top card: Put in hand if land. Else put +1/+1 counter on this and keep/grave it.",
+        "long": "701.44a Reveal the top card. If a land is revealed, put it in hand. Otherwise, put a +1/+1 counter on the exploring permanent and you may put the revealed card in your graveyard."
+    },
+    "Assemble": {
+        "short": "Put a Contraption onto the battlefield from your Contraption deck.",
+        "long": "701.45a Assemble is a keyword action that puts Contraptions onto the battlefield. (See silver-bordered rules for details.)"
+    },
+    "Adapt": {
+        "short": "If this has no +1/+1 counters, put N +1/+1 counters on it.",
+        "long": "701.46a “Adapt N” means “If this permanent has no +1/+1 counters on it, put N +1/+1 counters on it.”"
+    },
+    "Amass": {
+        "short": "Put N +1/+1 counters on an Army you control. If you don't control one, create a 0/0 Army token first.",
+        "long": "701.47a To amass [subtype] N means “If you don't control an Army creature, create a 0/0 black [subtype] Army creature token. Choose an Army creature you control. Put N +1/+1 counters on that creature.”"
+    },
+    "Learn": {
+        "short": "Discard to draw, or reveal a Lesson from outside the game and put it in your hand.",
+        "long": "701.48a “Learn” means “You may discard a card. If you do, draw a card. If you didn't discard a card, you may reveal a Lesson card you own from outside the game and put it into your hand.”"
+    },
+    "Venture into the Dungeon": {
+        "short": "Enter a dungeon or move to the next room of your current dungeon.",
+        "long": "701.49a Enter a dungeon you own from outside the game or move your venture marker to an adjacent room in your current dungeon."
+    },
+    "Connive": {
+        "short": "Draw, then discard. If nonland was discarded, put a +1/+1 counter on this.",
+        "long": "701.50a Draw a card, then discard a card. If a nonland card is discarded this way, put a +1/+1 counter on the conniving permanent."
+    },
+    "Open an Attraction": {
+        "short": "Put the top card of your Attraction deck onto the battlefield.",
+        "long": "701.51b To open an Attraction, move the top card of your Attraction deck off the deck, turn it face up, and put it onto the battlefield under your control."
+    },
+    "Roll to Visit Your Attractions": {
+        "short": "Roll a die. Visit Attractions with lit numbers equal to the result.",
+        "long": "701.52a To roll to visit your Attractions, roll a six-sided die. Then if you control one or more Attractions with a number lit up that is equal to that result, each of those Attractions has been “visited.”"
+    },
+    "Incubate": {
+        "short": "Create an Incubator token with N +1/+1 counters that can transform.",
+        "long": "701.53a To incubate N, create an Incubator token that enters the battlefield with N +1/+1 counters on it. It transforms into a 0/0 Phyrexian creature."
+    },
+    "The Ring Tempts You": {
+        "short": "Choose a creature to be your Ring-bearer and gain abilities from \"The Ring\" emblem.",
+        "long": "701.54a Choose a creature to be your Ring-bearer. That creature becomes your Ring-bearer until another creature becomes your Ring-bearer or another player gains control of it."
+    },
+    "Face a Villainous Choice": {
+        "short": "Choose one of two options and perform all actions for that option.",
+        "long": "701.55a “[A player] faces a villainous choice — [option A], or [option B]” means “[A player] chooses [option A] or [option B]. Then all actions in the chosen option are performed.”"
+    },
+    "Time Travel": {
+        "short": "Add or remove a time counter from permanents or suspended cards you control.",
+        "long": "701.56a To time travel means to choose any number of permanents you control (or suspended cards you own) with time counters and put a counter on it or remove a counter from it."
+    },
+    "Discover": {
+        "short": "Exile cards until you find nonland with mana value N or less. Cast it for free or put in hand.",
+        "long": "701.57a “Discover N” means “Exile cards until you exile nonland with mana value N or less. You may cast it for free if mana value ≤ N. If not, put it in hand.”"
+    },
+    "Cloak": {
+        "short": "Put face down as 2/2 creature with ward {2}. Turn up for mana cost if creature card.",
+        "long": "701.58a To cloak a card, turn it face down. It becomes a 2/2 face-down creature card with ward {2}, no name, no subtypes, and no mana cost."
+    },
+    "Collect Evidence": {
+        "short": "Exile cards from graveyard with total mana value N or greater.",
+        "long": "701.59a To “collect evidence N” means to exile any number of cards from your graveyard with total mana value N or greater."
+    },
+    "Suspect": {
+        "short": "A suspected creature has menace and can't block.",
+        "long": "701.60c A suspected permanent has menace and “This creature can't block” for as long as it's suspected."
+    },
+    "Forage": {
+        "short": "Exile three cards from your graveyard or sacrifice a Food.",
+        "long": "701.61a To forage means “Exile three cards from your graveyard or sacrifice a Food.”"
+    },
+    "Manifest Dread": {
+        "short": "Look at top two cards. Manifest one and graveyard the other.",
+        "long": "701.62a “Manifest dread” means “Look at the top two cards of your library. Manifest one of them, then put the other into your graveyard.”"
+    },
+    "Endure": {
+        "short": "Put N +1/+1 counters on this or create an N/N token.",
+        "long": "701.63a To endure N, that permanent's controller creates an N/N white Spirit creature token unless they put N +1/+1 counters on that permanent."
+    },
+    "Harness": {
+        "short": "This permanent becomes harnessed (marker for other abilities).",
+        "long": "701.64a “Harness [this permanent]” means “If this permanent isn't harnessed, it becomes harnessed.”"
+    },
+    "Airbend": {
+        "short": "Exile objects. Owner can cast them for {2}.",
+        "long": "701.65a Exile those objects. For each card exiled, its owner may cast it by paying {2} rather than paying its mana cost."
+    },
+    "Earthbend": {
+        "short": "Land becomes Haste creature with N counters. Returns tapped when it dies.",
+        "long": "701.66a Target land becomes a 0/0 land creature with haste and N +1/+1 counters. When it dies or is exiled, return it to the battlefield tapped."
+    },
+    "Waterbend": {
+        "short": "Tap creatures or artifacts to pay for generic mana cost.",
+        "long": "701.67a “Waterbend [cost]” means “Pay [cost]. For each generic mana in that cost, you may tap an untapped artifact or creature you control rather than pay that mana.”"
+    },
+    "Blight": {
+        "short": "Put N -1/-1 counters on a creature you control.",
+        "long": "701.68a To “blight N” means to put N -1/-1 counters on a creature you control."
+    },
+    // 702. Keyword Abilities
+    "Deathtouch": {
+        "short": "Any amount of damage this deals to a creature is enough to destroy it.",
+        "long": "702.2a Deathtouch is a static ability. 702.2b Any nonzero amount of combat damage assigned to a creature by a source with deathtouch is considered lethal damage."
+    },
+    "Defender": {
+        "short": "This creature can't attack.",
+        "long": "702.3a Defender is a static ability. 702.3b A creature with defender can't attack."
+    },
+    "Double Strike": {
+        "short": "Deals both first-strike and regular combat damage.",
+        "long": "702.4a Double strike is a static ability that modifies the rules for the combat damage step. It deals damage in two different combat damage steps."
+    },
+    "Enchant": {
+        "short": "Restricts what an Aura spell can target and what an Aura can enchant.",
+        "long": "702.5a Enchant is a static ability, written “Enchant [object or player].” It restricts what an Aura spell can target and what an Aura can enchant."
+    },
+    "Equip": {
+        "short": "Attach this to a creature you control. Activate only as a sorcery.",
+        "long": "702.6a Equip is an activated ability of Equipment cards. “Equip [cost]” means “[Cost]: Attach this permanent to target creature you control. Activate only as a sorcery.”"
+    },
+    "First Strike": {
+        "short": "Deals combat damage before creatures without first strike.",
+        "long": "702.7a First strike is a static ability that modifies the rules for the combat damage step. It deals damage only in the first combat damage step."
+    },
+    "Flash": {
+        "short": "You may play this card any time you could cast an instant.",
+        "long": "702.8a Flash means “You may play this card any time you could cast an instant.”"
+    },
+    "Flying": {
+        "short": "Can't be blocked except by creatures with flying or reach.",
+        "long": "702.9a Flying is an evasion ability. 702.9b A creature with flying can't be blocked except by creatures with flying and/or reach."
+    },
+    "Haste": {
+        "short": "Can attack and {T} as soon as it comes under your control.",
+        "long": "702.10a Haste is a static ability. 702.10b If a creature has haste, it can attack even if it hasn't been under its controller's control since the beginning of their most recent turn."
+    },
+    "Hexproof": {
+        "short": "Can't be the target of spells or abilities your opponents control.",
+        "long": "702.11a Hexproof is a static ability. 702.11b “Hexproof” on a permanent means “This permanent can't be the target of spells or abilities your opponents control.”"
+    },
+    "Indestructible": {
+        "short": "Can't be destroyed by damage or effects that say \"destroy.\"",
+        "long": "Indestructible is a static ability. 702.12b A permanent with indestructible can't be destroyed. Such permanents aren't destroyed by lethal damage."
+    },
+    "Intimidate": {
+        "short": "Can't be blocked except by artifact creatures and/or creatures that share a color with it.",
+        "long": "702.13a Intimidate is an evasion ability. 702.13b A creature with intimidate can't be blocked except by artifact creatures and/or creatures that share a color with it."
+    },
+    "Landwalk": {
+        "short": "Unblockable if defending player controls a land of the specified type.",
+        "long": "702.14a Landwalk is a generic term for a set of evasion abilities (Plainswalk, Islandwalk, Swampwalk, Mountainwalk, and Forestwalk)."
+    },
+    "Lifelink": {
+        "short": "Damage dealt by this also causes you to gain that much life.",
+        "long": "702.15a Lifelink is a static ability. 702.15b Damage dealt by a source with lifelink causes that source's controller to gain an amount of life equal to the amount of damage dealt."
+    },
+    "Protection": {
+        "short": "Can't be Damaged, Enchanted/Equipped, Blocked, or Targeted by [quality].",
+        "long": "702.16a Protection is a static ability, written “Protection from [quality].” (DEBT: Damage, Enchant/Equip, Block, Target)."
+    },
+    "Reach": {
+        "short": "Can block creatures with flying.",
+        "long": "701.17a Reach is a static ability. 702.17b A creature with reach can block a creature with flying."
+    },
+    "Shroud": {
+        "short": "Can't be the target of spells or abilities.",
+        "long": "702.18a Shroud is a static ability. 702.18b “Shroud” means “This permanent or player can't be the target of spells or abilities.”"
+    },
+    "Trample": {
+        "short": "Can deal excess combat damage to the player or planeswalker it's attacking.",
+        "long": "702.19a Trample is a static ability that modifies the rules for assigning combat damage. It assigns lethal damage to blockers and the rest to the player/planeswalker."
+    },
+    "Vigilance": {
+        "short": "Attacking doesn't cause this creature to tap.",
+        "long": "702.20a Vigilance is a static ability. 702.20b Attacking doesn't cause a creature with vigilance to tap."
+    },
+    "Ward": {
+        "short": "Counter spells or abilities targeting this unless a cost is paid.",
+        "long": "702.21a Ward is a triggered ability. “Ward [cost]” means “Whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless that player pays [cost].”"
+    }
+    // ... Additional items will follow in the next step to keep the diff manageable.
+};

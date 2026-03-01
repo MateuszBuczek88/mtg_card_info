@@ -376,10 +376,17 @@ function renderExactMatch(card) {
         }
 
         if (def) {
+            const btnTexts = {
+                en: { more: "Read More", less: "Show Less" },
+                pl: { more: "Czytaj więcej", less: "Pokaż mniej" },
+                es: { more: "Leer más", less: "Mostrar menos" }
+            };
+            const labels = btnTexts[currentLanguage] || btnTexts.en;
+
             tooltip.innerHTML = `
                 <div class="tooltip-content">
                     <div class="def-short">${def.short}</div>
-                    ${def.long ? `<button class="expand-def-btn">Read More</button><div class="def-long hidden">${def.long}</div>` : ''}
+                    ${def.long ? `<button class="expand-def-btn">${labels.more}</button><div class="def-long hidden">${def.long}</div>` : ''}
                 </div>
             `;
 
@@ -395,7 +402,8 @@ function renderExactMatch(card) {
                     e.stopPropagation();
                     const longDef = tooltip.querySelector('.def-long');
                     longDef.classList.toggle('hidden');
-                    expandBtn.textContent = longDef.classList.contains('hidden') ? 'Read More' : 'Show Less';
+                    const isHidden = longDef.classList.contains('hidden');
+                    expandBtn.textContent = isHidden ? labels.more : labels.less;
                 });
             }
         } else {
