@@ -28,6 +28,29 @@ function createTooltip() {
 }
 
 /**
+ * Handles custom word-to-keyword mappings.
+ * This can be extended in the future to map specific words/phrases to keywords.
+ */
+function getCustomKeywordMappings(oracleText) {
+    const customKeywords = new Set();
+    const normalizedText = oracleText.toLowerCase();
+
+    // Mapping: "trigger word" -> "keyword id" (as found in KEYWORDS_DATA keys)
+    const mappings = {
+        // 'copies': 'copy'
+    };
+
+    Object.entries(mappings).forEach(([word, keyword]) => {
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        if (regex.test(normalizedText)) {
+            customKeywords.add(keyword.toLowerCase());
+        }
+    });
+
+    return customKeywords;
+}
+
+/**
  * Extracts keywords from both Scryfall metadata and Oracle Text.
  */
 function getCardKeywords(card) {
@@ -69,7 +92,11 @@ function getCardKeywords(card) {
         });
     }
 
-    // 4. Convert to display format (Capitalized First Letter)
+    // 4. Add custom extensible mappings
+    const customMappings = getCustomKeywordMappings(oracleText);
+    customMappings.forEach(k => rawKeywords.add(k));
+
+    // 5. Convert to display format (Capitalized First Letter)
     const finalKeywords = new Set();
     Array.from(rawKeywords).forEach(k => {
         finalKeywords.add(k.charAt(0).toUpperCase() + k.slice(1).toLowerCase());
