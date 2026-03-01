@@ -31,9 +31,24 @@ function createTooltip() {
  * Extracts keywords from both Scryfall metadata and Oracle Text.
  */
 function getCardKeywords(card) {
-    const rawKeywords = new Set(card.keywords || []);
+    const rawKeywords = new Set();
 
-    // Get oracle text from all faces
+    // 1. Add metadata keywords ONLY if they have a definition in our master list
+    if (card.keywords && typeof KEYWORDS_DATA !== 'undefined') {
+        card.keywords.forEach(k => {
+            const lowerK = k.toLowerCase().trim();
+            // Basic match or partial match fallback (consistent with tooltip logic)
+            if (KEYWORDS_DATA[lowerK]) {
+                rawKeywords.add(lowerK);
+            } else {
+                const knownKeywords = Object.keys(KEYWORDS_DATA);
+                const foundBase = knownKeywords.find(base => lowerK.includes(base));
+                if (foundBase) rawKeywords.add(foundBase);
+            }
+        });
+    }
+
+    // 2. Get oracle text from all faces
     let oracleText = '';
     if (card.card_faces) {
         oracleText = card.card_faces.map(f => f.oracle_text || '').join(' ');
@@ -41,29 +56,23 @@ function getCardKeywords(card) {
         oracleText = card.oracle_text || '';
     }
 
-    // Scan oracle text for known keywords from KEYWORDS_DATA
+    // 3. Scan oracle text for known keywords from KEYWORDS_DATA
     if (typeof KEYWORDS_DATA !== 'undefined') {
         const knownKeywords = Object.keys(KEYWORDS_DATA);
         knownKeywords.forEach(keyword => {
-            // Use word boundaries to avoid partial matches (e.g., "Die" in "Dies")
-            // We escape the keyword to be safe, though most MTG keywords are alphanumeric
             const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
 
             if (regex.test(oracleText)) {
-                // Add the original keyword name (case from KEYWORDS_DATA keys if possible, or capitalized)
-                // Since our keys are lowercase, we should try to find a better display name or just capitalize
-                rawKeywords.add(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+                rawKeywords.add(keyword);
             }
         });
     }
 
-    // Convert back to array, sort, and normalize case for display
-    // We want to be careful about duplicates (e.g., 'flying' and 'Flying')
+    // 4. Convert to display format (Capitalized First Letter)
     const finalKeywords = new Set();
     Array.from(rawKeywords).forEach(k => {
-        // Find the "cannonical" case-sensitive version or just capitalize
-        finalKeywords.add(k.trim().charAt(0).toUpperCase() + k.trim().slice(1).toLowerCase());
+        finalKeywords.add(k.charAt(0).toUpperCase() + k.slice(1).toLowerCase());
     });
 
     return Array.from(finalKeywords).sort();
