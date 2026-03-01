@@ -188,7 +188,8 @@ body {
 .card-result {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 0;
+    /* Removing general gap for precise control */
     animation: fadeInUp 0.6s ease-out;
 }
 
@@ -196,29 +197,34 @@ body {
     .card-result {
         display: grid;
         grid-template-columns: 300px 1fr;
-        grid-template-rows: auto auto;
         column-gap: 2rem;
-        row-gap: 0;
-        /* Removed gap entirely */
         align-items: flex-start;
     }
 
-    .card-image-container {
+    .card-visuals {
         grid-column: 1;
         grid-row: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* Center keywords under image on desktop too if needed */
+        gap: 0;
+        /* Minimal gap between image and keywords */
     }
 
     .card-keywords-container {
-        grid-column: 1;
-        grid-row: 2;
-        margin-top: -1.2rem;
-        /* Pulled up even more to touch the image */
-        justify-content: flex-start;
+        margin-top: 0.4rem;
+        /* Increased to 0.4rem for better balance */
+        z-index: 5;
+        width: 100%;
+        justify-content: center;
     }
 
     .card-info-box {
         grid-column: 2;
         grid-row: 1 / span 2;
+        margin-top: 0;
+        /* Ensure no top margin in desktop */
     }
 }
 
@@ -313,6 +319,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    margin-top: 1.25rem;
+    /* Add gap back only on mobile */
 }
 
 .flags-container {
@@ -398,12 +406,22 @@ body {
 }
 
 /* Keywords Tooltips */
+.card-visuals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
 .card-keywords-container {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 0.25rem;
+    margin-top: 0.4rem;
+    /* Increased to 0.4rem for better balance */
     justify-content: center;
+    position: relative;
+    z-index: 5;
 }
 
 .keyword-badge {

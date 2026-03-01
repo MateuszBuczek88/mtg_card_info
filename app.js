@@ -297,27 +297,29 @@ function renderExactMatch(card) {
 
     resultsContainer.innerHTML = `
         <div class="card-result">
-            <div class="card-image-container ${isDoubleFaced ? 'is-double-faced' : ''}" id="card-image-container">
-                <div class="card-flipper" id="card-flipper">
-                    <div class="card-front">
-                        <img src="${imageUrl}" alt="${card.name}" class="card-image">
+            <div class="card-visuals">
+                <div class="card-image-container ${isDoubleFaced ? 'is-double-faced' : ''}" id="card-image-container">
+                    <div class="card-flipper" id="card-flipper">
+                        <div class="card-front">
+                            <img src="${imageUrl}" alt="${card.name}" class="card-image">
+                        </div>
+                        ${isDoubleFaced ? `
+                        <div class="card-back">
+                            <img src="${backImageUrl}" alt="${card.name} (Back)" class="card-image">
+                        </div>
+                        ` : ''}
                     </div>
                     ${isDoubleFaced ? `
-                    <div class="card-back">
-                        <img src="${backImageUrl}" alt="${card.name} (Back)" class="card-image">
+                    <div class="flip-btn" id="flip-btn" title="Click to flip">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.36-2.04"></path></svg>
                     </div>
                     ` : ''}
                 </div>
-                ${isDoubleFaced ? `
-                <div class="flip-btn" id="flip-btn" title="Click to flip">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.36-2.04"></path></svg>
+                <div class="card-keywords-container" id="keyword-badges">
+                    ${getCardKeywords(card).map(keyword => `
+                        <div class="keyword-badge" data-keyword="${keyword}">${keyword}</div>
+                    `).join('')}
                 </div>
-                ` : ''}
-            </div>
-            <div class="card-keywords-container" id="keyword-badges">
-                ${getCardKeywords(card).map(keyword => `
-                    <div class="keyword-badge" data-keyword="${keyword}">${keyword}</div>
-                `).join('')}
             </div>
             <div class="card-info-box">
                 <div class="flags-container">
