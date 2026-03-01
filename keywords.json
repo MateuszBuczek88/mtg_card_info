@@ -1,0 +1,54 @@
+{
+    "flying": {
+        "short": "Can't be blocked except by creatures with flying or reach.",
+        "long": "702.9a Flying is an evasion ability. 702.9b A creature with flying can't be blocked except by creatures with flying and/or reach. A creature with flying can block a creature with or without flying."
+    },
+    "first strike": {
+        "short": "Deals combat damage before creatures without first strike.",
+        "long": "702.7a First strike is a static ability that modifies the rules for the combat damage step. 702.7b If at least one attacking or blocking creature has first strike or double strike as the combat damage step begins, the only creatures that assign combat damage in that step are those with first strike or double strike."
+    },
+    "double strike": {
+        "short": "Deals both first-strike and regular combat damage.",
+        "long": "702.4a Double strike is a static ability that modifies the rules for the combat damage step. 702.4b If at least one attacking or blocking creature has first strike or double strike as the combat damage step begins, the phase gets a second combat damage step."
+    },
+    "deathtouch": {
+        "short": "Any amount of damage this creature deals to a creature is enough to destroy it.",
+        "long": "702.2a Deathtouch is a static ability. 702.2b Any nonzero amount of combat damage assigned to a creature by a source with deathtouch is considered lethal damage for the purposes of determining whether a creature is destroyed."
+    },
+    "lifelink": {
+        "short": "Damage dealt by this creature also causes you to gain that much life.",
+        "long": "702.15a Lifelink is a static ability. 702.15b Damage dealt by a source with lifelink causes that source’s controller, or its owner if it has no controller, to gain an amount of life equal to the amount of damage dealt."
+    },
+    "haste": {
+        "short": "Can attack and {T} as soon as it comes under your control.",
+        "long": "702.10a Haste is a static ability. 702.10b If a creature has haste, it can attack even if it hasn’t been under its controller’s control since the beginning of their most recent turn."
+    },
+    "trample": {
+        "short": "Can deal excess combat damage to the player or planeswalker it's attacking.",
+        "long": "702.19a Trample is a static ability that modifies the rules for assigning combat damage. 702.19b The controller of an attacking creature with trample first assigns damage to the creature(s) blocking it. Once all those blocking creatures are assigned lethal damage, any remaining damage is assigned as its controller chooses among those blocking creatures and the player or planeswalker the creature is attacking."
+    },
+    "vigilance": {
+        "short": "Attacking doesn't cause this creature to tap.",
+        "long": "702.20a Vigilance is a static ability. 702.20b Attacking doesn’t cause a creature with vigilance to tap."
+    },
+    "reach": {
+        "short": "Can block creatures with flying.",
+        "long": "702.17a Reach is a static ability. 702.17b A creature with reach can block a creature with flying."
+    },
+    "indestructible": {
+        "short": "Can't be destroyed by damage or effects that say \"destroy.\"",
+        "long": "702.12a Indestructible is a static ability. 702.12b A permanent with indestructible can’t be destroyed. Such permanents aren’t destroyed by lethal damage, and they ignore the state-based action that checks for lethal damage."
+    },
+    "ward": {
+        "short": "Counter spells or abilities targeting this unless a cost is paid.",
+        "long": "702.21a Ward is a triggered ability. “Ward [cost]” means “Whenever this permanent becomes the target of a spell or ability an opponent controls, counter that spell or ability unless that player pays [cost].”"
+    },
+    "storm": {
+        "short": "When you cast this spell, copy it for each spell cast before it this turn.",
+        "long": "702.40a Storm is a triggered ability that functions on the stack. “Storm” means “When you cast this spell, put a copy of it onto the stack for each other spell that was cast before it this turn. If the spell has any targets, you may choose new targets for any of the copies.”"
+    },
+    "infect": {
+        "short": "Deals damage in the form of -1/-1 counters to creatures and poison counters to players.",
+        "long": "702.90a Infect is a static ability. 702.90b Damage dealt to a player by a source with infect doesn’t cause that player to lose life; rather, it causes that source’s controller to give the player that many poison counters. 702.90c Damage dealt to a creature by a source with infect doesn’t become marked on that creature. Rather, it causes that many -1/-1 counters to be put on that creature."
+    }
+}

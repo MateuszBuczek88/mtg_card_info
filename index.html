@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <header class="header">
@@ -19,8 +21,14 @@
         <main class="main-content">
             <form id="search-form" class="search-section">
                 <div class="search-input-wrapper">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="search-input" placeholder="Search for a Magic card..." autocomplete="off" required>
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search for a Magic card..." autocomplete="off"
+                        required>
                 </div>
                 <button type="submit" class="primary-btn">Search</button>
             </form>
@@ -31,7 +39,7 @@
             </div>
 
             <div id="error-message" class="error-message hidden"></div>
-            
+
             <div id="info-message" class="info-message hidden"></div>
 
             <div id="results-container" class="results-container hidden">
@@ -47,6 +55,8 @@
         </main>
     </div>
 
+    <script src="keywords-data.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

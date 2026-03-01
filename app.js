@@ -1,6 +1,74 @@
 // Scryfall API Base URLs
 const API_BASE = 'https://api.scryfall.com/cards';
 
+// Language Prompts
+const PROMPTS = {
+    en: "Please explain this card to me",
+    pl: "Proszę wytłumacz mi tę kartę",
+    es: "Por favor, explícame esta carta"
+};
+let currentLanguage = 'en';
+
+// Tooltip variable
+let globalTooltip = null;
+
+function createTooltip() {
+    if (globalTooltip) return globalTooltip;
+    globalTooltip = document.createElement('div');
+    globalTooltip.className = 'keyword-tooltip hidden';
+    document.body.appendChild(globalTooltip);
+
+    globalTooltip.addEventListener('mouseleave', (e) => {
+        if (!e.relatedTarget || !e.relatedTarget.classList.contains('keyword-badge')) {
+            globalTooltip.classList.add('hidden');
+        }
+    });
+
+    return globalTooltip;
+}
+
+/**
+ * Extracts keywords from both Scryfall metadata and Oracle Text.
+ */
+function getCardKeywords(card) {
+    const rawKeywords = new Set(card.keywords || []);
+
+    // Get oracle text from all faces
+    let oracleText = '';
+    if (card.card_faces) {
+        oracleText = card.card_faces.map(f => f.oracle_text || '').join(' ');
+    } else {
+        oracleText = card.oracle_text || '';
+    }
+
+    // Scan oracle text for known keywords from KEYWORDS_DATA
+    if (typeof KEYWORDS_DATA !== 'undefined') {
+        const knownKeywords = Object.keys(KEYWORDS_DATA);
+        knownKeywords.forEach(keyword => {
+            // Use word boundaries to avoid partial matches (e.g., "Die" in "Dies")
+            // We escape the keyword to be safe, though most MTG keywords are alphanumeric
+            const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+
+            if (regex.test(oracleText)) {
+                // Add the original keyword name (case from KEYWORDS_DATA keys if possible, or capitalized)
+                // Since our keys are lowercase, we should try to find a better display name or just capitalize
+                rawKeywords.add(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+            }
+        });
+    }
+
+    // Convert back to array, sort, and normalize case for display
+    // We want to be careful about duplicates (e.g., 'flying' and 'Flying')
+    const finalKeywords = new Set();
+    Array.from(rawKeywords).forEach(k => {
+        // Find the "cannonical" case-sensitive version or just capitalize
+        finalKeywords.add(k.trim().charAt(0).toUpperCase() + k.trim().slice(1).toLowerCase());
+    });
+
+    return Array.from(finalKeywords).sort();
+}
+
 // DOM Elements
 const searchForm = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
@@ -180,11 +248,16 @@ function generateCardText(card) {
         oracleText = card.oracle_text || '';
     }
 
+    const keywords = getCardKeywords(card);
+    const keywordText = keywords.length > 0
+        ? `\nKeywords: ${keywords.join(', ')}`
+        : '';
+
     return `Card Name: ${card.name}
 Mana Cost: ${manaCost}
 Type: ${card.type_line}
 Color(s): ${colors}
-Color Identity: ${colorIdentity}${powerToughness}
+Color Identity: ${colorIdentity}${powerToughness}${keywordText}
 
 Oracle Text:
 ${oracleText}`;
@@ -232,8 +305,18 @@ function renderExactMatch(card) {
                 </div>
                 ` : ''}
             </div>
+            <div class="card-keywords-container" id="keyword-badges">
+                ${getCardKeywords(card).map(keyword => `
+                    <div class="keyword-badge" data-keyword="${keyword}">${keyword}</div>
+                `).join('')}
+            </div>
             <div class="card-info-box">
-                <textarea id="ai-prompt-input" class="ai-prompt-input">Please explain this card for me</textarea>
+                <div class="flags-container">
+                    <button class="lang-flag ${currentLanguage === 'en' ? 'active' : ''}" data-lang="en" title="English">🇬🇧</button>
+                    <button class="lang-flag ${currentLanguage === 'pl' ? 'active' : ''}" data-lang="pl" title="Polski">🇵🇱</button>
+                    <button class="lang-flag ${currentLanguage === 'es' ? 'active' : ''}" data-lang="es" title="Español">🇪🇸</button>
+                </div>
+                <textarea id="ai-prompt-input" class="ai-prompt-input">${PROMPTS[currentLanguage]}</textarea>
                 <div class="card-info-content" id="card-text-content">${cardText}</div>
                 <button id="copy-btn" class="copy-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -255,9 +338,99 @@ function renderExactMatch(card) {
         });
     }
 
+    // Add keyword tooltip listeners
+    const keywordBadges = document.querySelectorAll('.keyword-badge');
+    const tooltip = createTooltip();
+
+    let hideTimeout = null;
+
+    function showTooltip(badge) {
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        const keyword = (badge.dataset.keyword || '').toLowerCase();
+        // Use the global KEYWORDS_DATA from keywords-data.js
+        let def = typeof KEYWORDS_DATA !== 'undefined' ? KEYWORDS_DATA[keyword] : null;
+
+        if (!def && typeof KEYWORDS_DATA !== 'undefined') {
+            const knownKeywords = Object.keys(KEYWORDS_DATA);
+            const foundBase = knownKeywords.find(k => keyword.includes(k));
+            if (foundBase) def = KEYWORDS_DATA[foundBase];
+        }
+
+        if (def) {
+            tooltip.innerHTML = `
+                <div class="tooltip-content">
+                    <div class="def-short">${def.short}</div>
+                    ${def.long ? `<button class="expand-def-btn">Read More</button><div class="def-long hidden">${def.long}</div>` : ''}
+                </div>
+            `;
+
+            tooltip.classList.remove('hidden');
+
+            const rect = badge.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + window.scrollX}px`;
+            tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`; // Reduced gap
+
+            const expandBtn = tooltip.querySelector('.expand-def-btn');
+            if (expandBtn) {
+                expandBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const longDef = tooltip.querySelector('.def-long');
+                    longDef.classList.toggle('hidden');
+                    expandBtn.textContent = longDef.classList.contains('hidden') ? 'Read More' : 'Show Less';
+                });
+            }
+        } else {
+            tooltip.classList.add('hidden');
+        }
+    }
+
+    function hideTooltip() {
+        hideTimeout = setTimeout(() => {
+            tooltip.classList.add('hidden');
+        }, 200); // 200ms grace period
+    }
+
+    keywordBadges.forEach(badge => {
+        badge.addEventListener('mouseenter', () => showTooltip(badge));
+        badge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showTooltip(badge);
+        });
+
+        badge.addEventListener('mouseleave', () => hideTooltip());
+    });
+
+    tooltip.addEventListener('mouseenter', () => {
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+    });
+
+    tooltip.addEventListener('mouseleave', () => hideTooltip());
+
+    document.addEventListener('click', () => {
+        tooltip.classList.add('hidden');
+    });
+
+    // Add language flag listeners
+    const langFlags = document.querySelectorAll('.lang-flag');
+    const aiPromptInput = document.getElementById('ai-prompt-input');
+
+    langFlags.forEach(flag => {
+        flag.addEventListener('click', () => {
+            currentLanguage = flag.dataset.lang;
+            document.querySelectorAll('.lang-flag').forEach(f => f.classList.remove('active'));
+            flag.classList.add('active');
+            aiPromptInput.value = PROMPTS[currentLanguage];
+        });
+    });
+
     // Add copy listener
     const copyBtn = document.getElementById('copy-btn');
-    const aiPromptInput = document.getElementById('ai-prompt-input');
     copyBtn.addEventListener('click', () => {
         const fullTextToCopy = `${aiPromptInput.value}\n\n${cardText}`;
         navigator.clipboard.writeText(fullTextToCopy).then(() => {
