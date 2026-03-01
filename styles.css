@@ -88,11 +88,38 @@ body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+    z-index: 2;
+    /* Ensure icon is above input background */
+    pointer-events: none;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
 }
 
 #search-input {
     width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
+    padding: 1rem 3rem 1rem 3rem;
+    /* Left pad for search icon, Right pad for clear button */
     border-radius: 12px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -111,12 +138,10 @@ body {
     background: var(--bg-secondary);
 }
 
-.primary-btn {
+.primary-btn,
+.secondary-btn {
     padding: 1rem 2rem;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
-    color: white;
-    border: none;
     font-weight: 600;
     font-size: 1.1rem;
     cursor: pointer;
@@ -125,15 +150,49 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    border: none;
 }
 
-.primary-btn:hover {
+.primary-btn {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+    color: white;
+    flex: 2;
+}
+
+.secondary-btn {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    flex: 1;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
     transform: translateY(-2px);
     box-shadow: var(--glow);
 }
 
-.primary-btn:active {
+.secondary-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+}
+
+.primary-btn:active,
+.secondary-btn:active {
     transform: translateY(0);
+}
+
+.search-actions {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+}
+
+@media (max-width: 640px) {
+    .search-actions {
+        width: 100%;
+        flex-direction: column;
+    }
 }
 
 .hidden {

@@ -114,6 +114,8 @@ const infoEl = document.getElementById('info-message');
 const resultsContainer = document.getElementById('results-container');
 const multiResultsContainer = document.getElementById('multi-results-container');
 const cardList = document.getElementById('card-list');
+const clearBtn = document.getElementById('clear-search-btn');
+const randomBtn = document.getElementById('random-btn');
 
 // Event Listeners
 searchForm.addEventListener('submit', async (e) => {
@@ -122,6 +124,26 @@ searchForm.addEventListener('submit', async (e) => {
     if (!query) return;
 
     await searchCard(query);
+});
+
+// Clear button logic
+searchInput.addEventListener('input', () => {
+    if (searchInput.value.length > 0) {
+        clearBtn.classList.remove('hidden');
+    } else {
+        clearBtn.classList.add('hidden');
+    }
+});
+
+clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    searchInput.focus();
+    formatReset();
+});
+
+randomBtn.addEventListener('click', async () => {
+    await getRandomCard();
 });
 
 // Hide all states
@@ -191,6 +213,19 @@ async function searchCard(query) {
 
     } catch (err) {
         showError('Network error. Please try again.');
+        console.error(err);
+    }
+}
+
+async function getRandomCard() {
+    showLoading();
+    try {
+        const res = await fetch(`${API_BASE}/random`);
+        if (!res.ok) throw new Error('Failed to fetch random card');
+        const card = await res.json();
+        renderExactMatch(card);
+    } catch (err) {
+        showError('Failed to fetch a random card. Please try again.');
         console.error(err);
     }
 }
